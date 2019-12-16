@@ -1,22 +1,28 @@
-clear;
+%clear;
 
 vid = VideoReader('sample4.mp4');
 nFrames = vid.NumberOfFrames;
 startFrame = 1;
 step = 4;
 no_bins = 8;
-targetColorHist = zeros(no_bins, no_bins, no_bins);
+
+colorHistR = zeros(no_bins,1);
+colorHistG = zeros(no_bins,1);
+colorHistB = zeros(no_bins,1);
+
 
 for i = startFrame : step : nFrames
-    img = read(vid, i);
+    %img = read(vid, i);
     
     
-    windowWidth = size(img,2);
-    windowHeight = size(img,1);
+    windowWidth = 146;%size(img,2);
+    windowHeight = 146;%size(img,1);
     
     % Temp dummy center
-    targetX = 13;
-    targetY = 13;
+    targetX = windowWidth/2;
+    targetY = windowHeight/2;
+    
+   % img = img(342:342+145,191:191+145,:);
     
     % The normalization const.
     a =  sqrt(windowWidth^2 + windowHeight^2);
@@ -35,59 +41,46 @@ for i = startFrame : step : nFrames
     
     % Use a threshold so that only pixels within the bounding box are used
     % to update the color histogram.
-    removedPixelCoords = find((1 - normCenterDists.^2) >= 1); 
-    normCenterDists(removedPixelCoords) = 0;
     
-    centerDistWeights = normCenterDists;
-    
+    removedPixelCoords = find(normCenterDists >= 1);
+    centerDistWeights = 1-normCenterDists.^2;
+    centerDistWeights(removedPixelCoords) = 0;
     
     
     % ceil - Round up to the next integer
     % Map the img RGB values to closest bin. 
-    %imgBins = ceil( img / 32 );
     
-    imgBinsR = ceil( img(:,:,1) / 32 );
-    imgBinsG = ceil( img(:,:,2) / 32 );
-    imgBinsB = ceil( img(:,:,3) / 32 );
+%     imgBinsR = double(ceil( img(:,:,1) / 32 ));
+%     imgBinsG = double(ceil( img(:,:,2) / 32 ));
+%     imgBinsB = double(ceil( img(:,:,3) / 32 ));
     
+    binInterval = linspace(0, 255, 9);
+    [~,~, imgBinsR] = histcounts(reshape(img(:,:,1), [146, 146]), binInterval);
+    [~,~, imgBinsG] = histcounts(reshape(img(:,:,2), [146, 146]), binInterval);
+    [~,~, imgBinsB] = histcounts(reshape(img(:,:,3), [146, 146]), binInterval);
+     
+    aaaa = imgBinsR';
+for bin = 1 : no_bins
+    redBinsInds = find(imgBinsR == bin);
+    greenBinsInds = find(imgBinsG == bin);
+    blueBinsInds = find(imgBinsB == bin);
     
+    weightedRedImg = imgBinsR .* centerDistWeights;
+    weightedGreenImg  = imgBinsG .* centerDistWeights;
+    weightedBlueImg  = imgBinsB .* centerDistWeights;
     
-    for r = 1 : no_bins
-        for g = 1 : no_bins
-            for b = 1 : no_bins
-                
-                
-                indR = find(imgBinsR == r);
-                indG = find(imgBinsG == g);
-                indB = find(imgBinsB == b);
-                
-                
-                % Find common indicies for current r,g,b.
-                binVoteInd = indR(ismember(indR, indG));
-                binVoteInd = binVoteInd(ismember(binVoteInd,indB));
-                
-                % Check that there is a vote for this particular bin.
-                % vector but indicies same side as window
-                binContainsVotes = size(binVoteInd,1);
-                
-                if binContainsVotes
-                    
-                    votingMatrix = zeros(windowWidth, windowHeight);
-                    
-                    % Like using dirac
-                    votingMatrix(binContainsVotes) = 1;
-                    weightedBins = votingMatrix .* centerDistWeights';
-                    
-                    targetColorHist(r,g,b) = sum(sum(weightedBins));
-                    
-                end
-                
-            end
-        end
-    end
+    redBins = weightedRedImg(redBinsInds);
+    greenBins = weightedGreenImg(greenBinsInds);
+    blueBins = weightedBlueImg(blueBinsInds);
     
-    norm_const = sum(sum(sum(targetColorHist)));
+    colorHistR(bin) = sum(sum(redBins));
+    colorHistG(bin) = sum(sum(greenBins));
+    colorHistB(bin) = sum(sum(blueBins));
     
-    targetColorHist = targetColorHist/norm_const;
+end
+                       
+    colorHistR = colorHistR/sum(colorHistR);
+    colorHistG = colorHistG/sum(colorHistG);
+    colorHistB = colorHistB/sum(colorHistB);
 
 end
