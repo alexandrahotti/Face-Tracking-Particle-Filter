@@ -4,6 +4,7 @@ noVideoFrams = vid.NumberOfFrames;
 timeStepSkip = 4;
 
 M = 100;
+alpha=0.7;
 sigmaNoise = 0.2;
 sigmaColor = 0.3;
 sigmaGrad = 0.3;
@@ -16,6 +17,7 @@ dE = zeros(M, 1);
 wC = zeros(M, 1);
 wE = zeros(M, 1);
 wT = zeros(M, 1);
+
 
 for t = 1 : timeStepSkip : noVideoFrams
     
