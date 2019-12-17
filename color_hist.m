@@ -1,5 +1,5 @@
 
-function [colorHistR, colorHistG, colorHistB] = createColorHist( boundingBox )
+function colorHists = createColorHist( croppedImage )
 % Input: A bounding box centered on a particles.
 % Output: Color histograms for the bounding box from the R, G & B channels.
 
@@ -10,7 +10,7 @@ colorHistG = zeros(no_bins,1);
 colorHistB = zeros(no_bins,1);
 
 % Bounding box dimensions.
-[windowWidth, windowHeight] = size(boundingBox);
+[windowWidth, windowHeight] = size(croppedImage);
 
 % Center coordinates.
 targetX = windowWidth/2;
@@ -30,7 +30,7 @@ pixelCoordsY = repmat((1:windowHeight)',[1,windowWidth]);
 centerDists = sqrt((targetX - pixelCoordsX).^2 + (targetY - pixelCoordsY).^2) ;
 
 % Normalize distance to target center to account for that different
-% boundingboxes could have different sizes.
+% croppedImagees could have different sizes.
 normCenterDists = centerDists/a;
 
 % Use a threshold so that only pixels within the bounding box are used
@@ -39,25 +39,25 @@ removedPixelCoords = find(normCenterDists >= 1);
 centerDistWeights = 1-normCenterDists.^2;
 centerDistWeights(removedPixelCoords) = 0;
 
-% Map the boundingBox RGB values to closest bin. 
+% Map the croppedImage RGB values to closest bin. 
 binInterval = linspace(0, 255, 9);
-[~,~, boundingBoxBinsR] = histcounts(reshape(boundingBox(:,:,1), [windowWidth, windowHeight]), binInterval);
-[~,~, boundingBoxBinsG] = histcounts(reshape(boundingBox(:,:,2), [windowWidth, windowHeight]), binInterval);
-[~,~, boundingBoxBinsB] = histcounts(reshape(boundingBox(:,:,3), [windowWidth, windowHeight]), binInterval);
+[~,~, croppedImageBinsR] = histcounts(reshape(croppedImage(:,:,1), [windowWidth, windowHeight]), binInterval);
+[~,~, croppedImageBinsG] = histcounts(reshape(croppedImage(:,:,2), [windowWidth, windowHeight]), binInterval);
+[~,~, croppedImageBinsB] = histcounts(reshape(croppedImage(:,:,3), [windowWidth, windowHeight]), binInterval);
 
 %% 
 for bin = 1 : no_bins
-    redBinsInds = find(boundingBoxBinsR == bin);
-    greenBinsInds = find(boundingBoxBinsG == bin);
-    blueBinsInds = find(boundingBoxBinsB == bin);
+    redBinsInds = find(croppedImageBinsR == bin);
+    greenBinsInds = find(croppedImageBinsG == bin);
+    blueBinsInds = find(croppedImageBinsB == bin);
 
-    weightedRedboundingBox = boundingBoxBinsR .* centerDistWeights;
-    weightedGreenboundingBox  = boundingBoxBinsG .* centerDistWeights;
-    weightedBlueboundingBox  = boundingBoxBinsB .* centerDistWeights;
+    weightedRedcroppedImage = croppedImageBinsR .* centerDistWeights;
+    weightedGreencroppedImage  = croppedImageBinsG .* centerDistWeights;
+    weightedBluecroppedImage  = croppedImageBinsB .* centerDistWeights;
 
-    redBins = weightedRedboundingBox(redBinsInds);
-    greenBins = weightedGreenboundingBox(greenBinsInds);
-    blueBins = weightedBlueboundingBox(blueBinsInds);
+    redBins = weightedRedcroppedImage(redBinsInds);
+    greenBins = weightedGreencroppedImage(greenBinsInds);
+    blueBins = weightedBluecroppedImage(blueBinsInds);
 
     colorHistR(bin) = sum(sum(redBins));
     colorHistG(bin) = sum(sum(greenBins));
@@ -68,5 +68,7 @@ end
 colorHistR = colorHistR/sum(colorHistR);
 colorHistG = colorHistG/sum(colorHistG);
 colorHistB = colorHistB/sum(colorHistB);
+
+colorHists = [colorHistR, colorHistG, colorHistB];
 
 end
