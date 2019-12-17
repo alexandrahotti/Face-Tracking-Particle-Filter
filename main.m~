@@ -24,12 +24,12 @@ for t = 1 : timeStepSkip : noVideoFrams
     image = read(vid, t);
     
     if t ==1
-        [stateVector, boundingBox] = viola(image);
-        particles = initParticles([stateVector, boundingBox], M);
+        [stateVet, dBB]boundingBox = viola(image);
+        particles = initParticles(boundingBox, M);
         %[boundingBox, dBB]  = initStateVector(boundingBox);
         
         % Crop the image according to the bounding box.
-        cropped = cropImage(image, [stateVector, boundingBox]);
+        cropped = cropImage(image, boundingBox);
         
         qC = createColorHist( cropped );
         
@@ -45,8 +45,10 @@ for t = 1 : timeStepSkip : noVideoFrams
     % Weight update.
     
     for p = 1:M
-        croppedImg = cropImage(image, [particles(p, 1:2), boundingBox]); % Obs os�ker p� om w h eller h w.
-        colorHist = createColorHist(croppedImg);
+        w = boundingBox(3);
+        h = boundingBox(4);
+        croppedImg = cropImage(image, [particles(p, 1:2), w, h]); % Obs os�ker p� om w h eller h w.
+        colorHist = createColorHist( boundingBox );
         liklihoodsColor(p, :) = colorHist;
         
     end
@@ -62,13 +64,6 @@ for t = 1 : timeStepSkip : noVideoFrams
     particles = normalizeWeights(particles);
     
     stateVector = estimateMeanState(particles);
-
-    % Now, create mean state histogram p_ES_t
-        cropped = cropImage(image, [stateVector, boundingBox]);
-        pESt = createColorHist(cropped);
-    
-    % Update target model qC
-    qC = updateTargetModel(alpha,qC,PESt);
     
     particles = systematicResample(particles);
 
