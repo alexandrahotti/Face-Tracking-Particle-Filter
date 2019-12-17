@@ -4,6 +4,7 @@ function cropped = cropImage(image, bBox)
 %       - bBox  1x4
 %OUTPUT - cropped size of bBox
 
-cropped=imcrop(image,bBox);
+cropped = image(bBox(1):bBox(1)+bBox(3)-1,bBox(2):bBox(2)+bBox(4)-1,:);
+%cropped=imcrop(image,bBox);
 end
 

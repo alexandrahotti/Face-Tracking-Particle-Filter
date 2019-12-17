@@ -10,7 +10,7 @@ colorHistG = zeros(no_bins,1);
 colorHistB = zeros(no_bins,1);
 
 % Bounding box dimensions.
-[windowWidth, windowHeight] = size(croppedImage);
+[windowWidth, windowHeight, ~] = size(croppedImage);
 
 % Center coordinates.
 targetX = windowWidth/2;
@@ -35,7 +35,7 @@ normCenterDists = centerDists/a;
 
 % Use a threshold so that only pixels within the bounding box are used
 % to update the color histogram.
-removedPixelCoords = find(normCenterDists >= 1);
+removedPixelCoords = normCenterDists >= 1;
 centerDistWeights = 1-normCenterDists.^2;
 centerDistWeights(removedPixelCoords) = 0;
 
@@ -65,10 +65,12 @@ for bin = 1 : no_bins
 
 end
 
-colorHistR = colorHistR/sum(colorHistR);
-colorHistG = colorHistG/sum(colorHistG);
-colorHistB = colorHistB/sum(colorHistB);
+% colorHistR = colorHistR/sum(colorHistR);
+% colorHistG = colorHistG/sum(colorHistG);
+% colorHistB = colorHistB/sum(colorHistB);
 
-colorHists = [colorHistR, colorHistG, colorHistB];
+
+colorHists = [colorHistR', colorHistG', colorHistB'];
+colorHists = colorHists / sum(colorHists);
 
 end
