@@ -1,5 +1,5 @@
 
-function colorHists = createGradientOrientationHist( croppedImage )
+function gradientOrientationHist = createGradientOrientationHist( croppedImage )
 % Input: A bounding box centered on a particles.
 % Output: Color histograms for the bounding box from the R, G & B channels.
 
