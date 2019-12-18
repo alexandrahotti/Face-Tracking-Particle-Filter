@@ -24,13 +24,9 @@ wC = zeros(M, 1);
 wE = zeros(M, 1);
 wT = zeros(M, 1);
 
-% create the video writer with 1 fps
-writerObj = VideoWriter('myVideo.avi');
-writerObj.FrameRate = 10;
-open(writerObj);
 
-for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
-    image = read(vid, t);
+for t = 1 : timeStepSkip : noVideoFrams
+    image = read(vid, t+50);
     imageSize = size(image);
     
     % Vis image
@@ -65,7 +61,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
 %         h = [stateVector(2)+boundingBox(2) stateVector(2)+boundingBox(2)]; % start end y coord of line 1
         
         boundInc = 0;
-        a =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+boundInc]; % start end x coord of line 1
+        a =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+15]; % start end x coord of line 1
         b = [stateVector(2)-boundInc stateVector(2)-boundInc]; % start end y coord of line 1
         c = [stateVector(1)-boundInc stateVector(1)-boundInc];% start end x coord of line 2
         d = [stateVector(2)-boundInc stateVector(2)+boundingBox(2)+boundInc];% start end y coord of line 2
@@ -77,10 +73,11 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
         hold on;
         
         
+        
+              hold off
+      F(i) = getframe(gcf) ;
+      drawnow
 
-        hold off
-        drawnow
-        writeVideo(writerObj, getframe(gcf));
     end
     
     
@@ -133,4 +130,3 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     particles = systematicResample(particles);
 
 end
-close(writerObj);

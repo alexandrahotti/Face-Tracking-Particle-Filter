@@ -1,5 +1,5 @@
 
-function gradientOrientationHist = createGradientOrientationHist( croppedImage )
+function colorHists = createGradientOrientationHist( croppedImage )
 % Input: A bounding box centered on a particles.
 % Output: Color histograms for the bounding box from the R, G & B channels.
 
@@ -12,12 +12,12 @@ function gradientOrientationHist = createGradientOrientationHist( croppedImage )
 % img = read(vid, startFrame);
 % croppedImage = img(342:342+145,191:191+145,:);
 
-%% Parameter init
+%% Par
 no_bins = 8;
 gradientOrientationHist = zeros(no_bins,1);
 
 % Bounding box dimensions.
-[windowHeight,windowWidth, ~ ] = size(croppedImage);
+[windowWidth, windowHeight, ~ ] = size(croppedImage);
 
 % Center coordinates.
 targetX = windowWidth/2;
@@ -60,7 +60,7 @@ binInterval = linspace(0, 180, 9);
 for bin = 1 : no_bins
     gradientBins = imgBins == bin;
    
-    weightedImage = imgBins .* centerDistWeights';
+    weightedImage = imgBins .* centerDistWeights;
     
     weightedImageBins = weightedImage(gradientBins);
     

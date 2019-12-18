@@ -6,21 +6,23 @@ var_x = 1000;
 var_y = 1500;
 
 
-noiseX = mvnrnd(zeros(size(sigma)), var_x, M);
-noiseY = mvnrnd(zeros(size(sigma)), var_y, M);
+noiseX = randn(1, M).*sqrt(var_x); %mvnrnd(zeros(size(sigma)), sigma, M);
+noiseY = randn(1, M).*sqrt(var_y); %mvnrnd(zeros(size(sigma)), sigma, M);
 %particles(:,1:2) = round(particles(:,1:2) + noise);
 
-velx = 2*randn(M, 1).*sqrt(2500);
-vely = 1*randn(M, 1).*sqrt(2500);
+velx = 2*randn(1, M).*sqrt(2500);
+vely = 1*randn(1, M).*sqrt(2500);
 
 w = imgSize(1);
 h = imgSize(2);
 
 
-particles(:,1) = round(particles(:,1) + noiseX );%+ velx);
-particles(:,2) = round(particles(:,2) + noiseY );%+ vely);
+particles(:,1) = round(particles(:,1) + noiseX' + velx');
+particles(:,2) = round(particles(:,2) + noiseY' + vely');
 
 particles(:,1) = min(max(particles(:,1), 1), w);
 particles(:,2) = min(max(particles(:,2), 1), h);
+
+particles = particles'
 end
 

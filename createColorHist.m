@@ -10,7 +10,7 @@ colorHistG = zeros(no_bins,1);
 colorHistB = zeros(no_bins,1);
 
 % Bounding box dimensions.
-[windowWidth, windowHeight, ~] = size(croppedImage);
+[windowHeight, windowWidth, ~] = size(croppedImage);
 
 % Center coordinates.
 targetX = windowWidth/2;
@@ -51,9 +51,9 @@ for bin = 1 : no_bins
     greenBinsInds = find(croppedImageBinsG == bin);
     blueBinsInds = find(croppedImageBinsB == bin);
 
-    weightedRedcroppedImage = croppedImageBinsR .* centerDistWeights;
-    weightedGreencroppedImage  = croppedImageBinsG .* centerDistWeights;
-    weightedBluecroppedImage  = croppedImageBinsB .* centerDistWeights;
+    weightedRedcroppedImage = croppedImageBinsR .* centerDistWeights';
+    weightedGreencroppedImage  = croppedImageBinsG .* centerDistWeights';
+    weightedBluecroppedImage  = croppedImageBinsB .* centerDistWeights';
 
     redBins = weightedRedcroppedImage(redBinsInds);
     greenBins = weightedGreencroppedImage(greenBinsInds);
