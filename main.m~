@@ -12,11 +12,11 @@ timeStepSkip = 5;
 
 M = 100;
 alpha=0.1;
+sigmaNoise = 300;
 
-
-sigmaY = 1000;
-sigmaX = 1500;
-sigmaNoise = [sigmaY sigmaX];
+var_x = 1000;
+var_y = 1500;
+sigmaNoise = [
 sigmaColor = 0.3;
 sigmaGrad = 0.3;
 no_bins = 8;
@@ -30,7 +30,7 @@ wE = zeros(M, 1);
 wT = zeros(M, 1);
 
 % create the video writer with 1 fps
-writerObj = VideoWriter('myVideo2.avi');
+writerObj = VideoWriter('myVideo.avi');
 writerObj.FrameRate = 10;
 open(writerObj);
 
