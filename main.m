@@ -139,7 +139,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     pEStObservationVector(t)=pEStColorObservationProbability;
     
 
-    
+    % alex
     % Update target model qC if above threshold
     if pEStColorObservationProbability > updateThreshold  
         qC = updateTargetModel(alpha,qC,pESt);
