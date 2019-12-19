@@ -5,10 +5,10 @@ close;
 addpath('indata');
 %vid = VideoReader('C:\Users\Alexa\Desktop\KTH\ï¿½rskurs_5\Applied Estimation\Project\sample4.MP4');
 %addpath('/home/jacob/Documents/EL2320/Projekt/filmer')
-vid = VideoReader('alex_vanlig_blå.MOV');
+vid = VideoReader('alex_vanlig_blÃ¥.MOV');
 %vid = VideoReader('sample4.mp4');
 
-
+updateThreshold=0.3;
 noVideoFrams = vid.NumberOfFrames;
 timeStepSkip = 1;
 
@@ -34,6 +34,9 @@ dE = zeros(M, 1);
 wC = zeros(M, 1);
 wE = zeros(M, 1);
 wT = zeros(M, 1);
+
+
+pEStObservationVector=zeros(1, noVideoFrams);
 
 % create the video writer with 1 fps
 writerObj = VideoWriter('jacob_sigvel600_t1.avi');
@@ -127,9 +130,22 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     qESt = createGradientOrientationHist(cropped);
     
     
-    % Update target model qC
-    qC = updateTargetModel(alpha,qC,pESt);
-    qE = updateTargetModel(alpha,qE,qESt);
+    %Now calculate the observation prob of pESt
+    
+    pEStCroppedImg = cropImage(image, [stateVector, boundingBox]);
+    pEStColorHist = createColorHist(pEStCroppedImg);
+    pEStDC = bhattacharyya(pEStColorHist, qC);
+    pEStColorObservationProbability = calculateWeights(pEStDC, sigmaColor);
+    pEStObservationVector(t)=pEStColorObservationProbability;
+    
+
+    
+    % Update target model qC if above threshold
+    if pEStColorObservationProbability > updateThreshold  
+        qC = updateTargetModel(alpha,qC,pESt);
+        qE = updateTargetModel(alpha,qE,qESt);
+    end
+
     
     particles = systematicResample(particles);
 
