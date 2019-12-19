@@ -4,7 +4,9 @@ close;
 %vid = VideoReader('C:\Users\Alexa\Desktop\KTH\�rskurs_5\Applied Estimation\Project\sample4.mp4');
 addpath('indata');
 %vid = VideoReader('C:\Users\Alexa\Desktop\KTH\�rskurs_5\Applied Estimation\Project\sample4.MP4');
-vid = VideoReader('sample4.mp4');
+%addpath('/home/jacob/Documents/EL2320/Projekt/filmer')
+vid = VideoReader('jacobBlue.MOV');
+%vid = VideoReader('sample4.mp4');
 
 
 noVideoFrams = vid.NumberOfFrames;
@@ -36,15 +38,13 @@ open(writerObj);
 
 for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     image = read(vid, t);
-    imageSize = size(image);
+    imageSize = size(image)
     
     % Vis image
 
     
     if t ==1
         [stateVector, boundingBox] = viola(image);
-        w = size(image,2);
-        h = size(image,1);
         particles = initParticles([stateVector, boundingBox], M);
         %particles = initParticlesGlobal([w h]-boundingBox/2, M);
         dBB = initDBB(cornerToCenter([stateVector, boundingBox]),particles);

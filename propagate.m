@@ -8,8 +8,8 @@ noiseX = mvnrnd(0, sigma(2), M);
 %particles(:,1:2) = round(particles(:,1:2) + noise);
 
 
-w = imgSize(1);
-h = imgSize(2);
+w = imgSize(2);
+h = imgSize(1);
 
 
 particles(:,1) = round(particles(:,1) + noiseY );%+ velx);
