@@ -5,7 +5,7 @@ close;
 addpath('indata');
 %vid = VideoReader('C:\Users\Alexa\Desktop\KTH\�rskurs_5\Applied Estimation\Project\sample4.MP4');
 %addpath('/home/jacob/Documents/EL2320/Projekt/filmer')
-vid = VideoReader('alex_vanlig_blå.MOV');
+vid = VideoReader('jacob_upp_ner.MOV');
 %vid = VideoReader('sample4.mp4');
 
 updateThreshold=0.3;
@@ -15,14 +15,14 @@ timeStepSkip = 1;
 M = 100;
 alpha=0;
 
+sigmaY = 1500*1.1;
+sigmaX = 700;
 
-sigmaY = 700;
-sigmaX = 1500*1.1;
 sigmadX = 600;
-sigmadY = 600;
+sigmadY = 1200;
 
-sigmaNoise = [sigmaY sigmaX sigmadX sigmadY];
-velocityMax = [40 40];
+sigmaNoise = [sigmaY sigmaX sigmadY sigmadX];
+velocityMax = [40 120];
 sigmaColor = 0.5;
 sigmaGrad = 0.5;
 no_bins = 8;
@@ -39,7 +39,7 @@ wT = zeros(M, 1);
 pEStObservationVector=zeros(1, noVideoFrams);
 
 % create the video writer with 1 fps
-writerObj = VideoWriter('jacob_sigvel600_t1.avi');
+writerObj = VideoWriter('jacob_upp_ner.mp4');
 writerObj.FrameRate = 30;
 open(writerObj);
 
