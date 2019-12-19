@@ -8,17 +8,17 @@ addpath('indata');
 vid = VideoReader('jacob_upp_ner.MOV');
 %vid = VideoReader('sample4.mp4');
 
-updateThreshold=0.3;
+updateThreshold=0.5;
 noVideoFrams = vid.NumberOfFrames;
 timeStepSkip = 1;
 
 M = 100;
 alpha=0;
 
-sigmaY = 1500*1.1;
-sigmaX = 700;
+sigmaY = 1200;
+sigmaX = 800;
 
-sigmadX = 600;
+sigmadX = 500;
 sigmadY = 1200;
 
 sigmaNoise = [sigmaY sigmaX sigmadY sigmadX];
@@ -39,7 +39,7 @@ wT = zeros(M, 1);
 pEStObservationVector=zeros(1, noVideoFrams);
 
 % create the video writer with 1 fps
-writerObj = VideoWriter('jacob_upp_ner.mp4');
+writerObj = VideoWriter('jacob_lampa.avi');
 writerObj.FrameRate = 30;
 open(writerObj);
 
@@ -60,7 +60,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
         % Crop the image according to the bounding box.
         cropped = cropImage(image, [stateVector(1), stateVector(2), boundingBox]);
         qC = createColorHist(cropped);
-        qE = createGradientOrientationHist( cropped );
+        %qE = createGradientOrientationHist( cropped );
 
         
     else
@@ -95,21 +95,29 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     for p = 1:M
         cornerP = centerToCorner(particles(p, 1:2), boundingBox);
         croppedImg = cropImage(image, [cornerP, boundingBox]); % Obs os�ker p� om w h eller h w.
-        colorHist = createColorHist(croppedImg);
-        liklihoodsColor(p, :) = colorHist;
-        
-        gradientOrientationHist = createGradientOrientationHist( croppedImg );
-        liklihoodsGradient(p, :) = gradientOrientationHist;
+        if size(croppedImg,1) ~= 0
+            
+            colorHist = createColorHist(croppedImg);
+            liklihoodsColor(p, :) = colorHist;
+
+            gradientOrientationHist = createGradientOrientationHist( croppedImg );
+            liklihoodsGradient(p, :) = gradientOrientationHist;
+        else
+            liklihoodsColor(p, :) = 0;
+            liklihoodsGradient(p, :) = 0;
+        end
         
     end
+
     
        
     dC = bhattacharyya(liklihoodsColor, qC);
-    dE = bhattacharyya(liklihoodsGradient, qE');
+    %dE = bhattacharyya(liklihoodsGradient, qE');
     
     wC = calculateWeights(dC, sigmaColor);
-    wE = calculateWeights(dE, sigmaGrad);
-    wTotal = wC*1 + wE*0;
+    %wE = calculateWeights(dE, sigmaGrad);
+    %wTotal = wC*1 + wE*0;
+    wTotal = wC*1;
     
     particles = setWeights(particles, wTotal);
     
@@ -127,7 +135,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     % Now, create mean state histogram p_ES_t
     cropped = cropImage(image, [stateVector(1:2), boundingBox]);
     pESt = createColorHist(cropped);
-    qESt = createGradientOrientationHist(cropped);
+    %qESt = createGradientOrientationHist(cropped);
     
     
     %Now calculate the observation prob of pESt
@@ -143,7 +151,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     % Update target model qC if above threshold
     if pEStColorObservationProbability > updateThreshold  
         qC = updateTargetModel(alpha,qC,pESt);
-        qE = updateTargetModel(alpha,qE,qESt);
+        %qE = updateTargetModel(alpha,qE,qESt);
     end
 
     
