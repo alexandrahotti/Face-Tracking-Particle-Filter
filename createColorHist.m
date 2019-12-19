@@ -69,7 +69,6 @@ end
 % colorHistG = colorHistG/sum(colorHistG);
 % colorHistB = colorHistB/sum(colorHistB);
 
-
 colorHists = [colorHistR', colorHistG', colorHistB'];
 colorHists = colorHists / sum(colorHists);
 
