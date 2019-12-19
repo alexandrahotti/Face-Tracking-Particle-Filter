@@ -5,22 +5,27 @@ close;
 addpath('indata');
 %vid = VideoReader('C:\Users\Alexa\Desktop\KTH\�rskurs_5\Applied Estimation\Project\sample4.MP4');
 %addpath('/home/jacob/Documents/EL2320/Projekt/filmer')
-vid = VideoReader('jacobBlue.MOV');
+addpath(genpath('/home/jacob/Documents/EL2320/Projekt/filmer'));
+%vid = VideoReader('jacobRed.MOV');
 %vid = VideoReader('sample4.mp4');
-
-
-noVideoFrams = vid.NumberOfFrames;
-timeStepSkip = 5;
+%vid = VideoReader('IMG_4823.MOV');
+%vid = VideoReader('IMG_4819_small.mp4');
+%vid = VideoReader('Blå vägg/IMG_4819.MOV');
+%vid = VideoReader('video_640.mp4'); %25
+noVideoFrams = vid.NumberOfFrames
+timeStepSkip = 1;
 
 M = 100;
-alpha=0.1;
+alpha=0.8;
 
+pEStObservationVector=zeros(1, noVideoFrams);
 
 sigmaY = 1000;
 sigmaX = 1500;
 sigmaNoise = [sigmaY sigmaX];
-sigmaColor = 0.3;
+sigmaColor = 0.8;
 sigmaGrad = 0.3;
+updateThreshold = 0.3;
 no_bins = 8;
 
 liklihoodsColor = zeros(M, no_bins*3);
@@ -33,18 +38,26 @@ wT = zeros(M, 1);
 
 % create the video writer with 1 fps
 writerObj = VideoWriter('myVideo2.avi');
-writerObj.FrameRate = 10;
+writerObj.FrameRate = 30;
 open(writerObj);
+
 
 for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     image = read(vid, t);
-    imageSize = size(image)
+    imageSize = size(image);
     
     % Vis image
 
     
     if t ==1
+        %
         [stateVector, boundingBox] = viola(image);
+%         ini_state=[379,631,345,345];
+%         stateVector = [631, 379];
+%         boundingBox = [345, 345];
+         %stateVector = [402, 145]
+         %boundingBox=[118, 118];
+        
         particles = initParticles([stateVector, boundingBox], M);
         %particles = initParticlesGlobal([w h]-boundingBox/2, M);
         dBB = initDBB(cornerToCenter([stateVector, boundingBox]),particles);
@@ -111,8 +124,9 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     
     wC = calculateWeights(dC, sigmaColor);
     wE = calculateWeights(dE, sigmaGrad);
-    wTotal = wC*0.5 + wE*0.5;
-    
+    %wTotal = wC*0.5 + wE*0.5;
+    wTotal = wC*1 + wE*0;
+    %wTotal = wC*0 + wE*1;
     particles = setWeights(particles, wTotal);
     
     particles = normalizeWeights(particles);
@@ -120,7 +134,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     imshow(image);
     hold on;
 
-    scatter(particles(:,1), particles(:,2)); %, size, color, 'filled');
+    scatter(particles(:,1), particles(:,2), 'red'); %, size, color, 'filled');
     hold on;
     
     centeredStateVector = estimateMeanState(particles);
@@ -129,13 +143,26 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     % Now, create mean state histogram p_ES_t
     cropped = cropImage(image, [stateVector, boundingBox]);
     pESt = createColorHist(cropped);
+    qESt = createGradientOrientationHist(cropped);
     
+
+   
+    %Now calculate the observation prob of pESt
     
+    pEStCroppedImg = cropImage(image, [stateVector, boundingBox]);
+    pEStColorHist = createColorHist(pEStCroppedImg);
+    pEStDC = bhattacharyya(pEStColorHist, qC);
+    pEStColorObservationProbability = calculateWeights(pEStDC, sigmaColor)
+    pEStObservationVector(t)=pEStColorObservationProbability;
+    
+
     
     % Update target model qC
-    qC = updateTargetModel(alpha,qC,pESt);
-    
-    particles = systematicResample(particles);
+    if pEStColorObservationProbability > updateThreshold  
+        qC = updateTargetModel(alpha,qC,pESt);
+        qE = updateTargetModel(alpha,qE,qESt);
+        particles = systematicResample(particles);
+    end
 
 end
 close(writerObj);
