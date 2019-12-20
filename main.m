@@ -10,22 +10,22 @@ addpath('indata');
 %vid = VideoReader('sample4.mp4');
 vid = VideoReader('occ_480.mp4');
 
-updateThreshold=0.2;
+updateThreshold=0.3;
 noVideoFrams = vid.NumberOfFrames;
 timeStepSkip = 1;
 
 M = 100;
 alpha=0;
 
-sigmaY = 500/4;
+sigmaY = 500/5;
 sigmaX = 700/4;
 
-sigmadX = 1200/3;
+sigmadX = 1200/6;
 sigmadY = 500/4;
 
 
 sigmaNoise = [sigmaY sigmaX sigmadY sigmadX];
-velocityMax = [32 40/5]; % y x
+velocityMax = [40 40/5]; % y x
 sigmaColor = 0.5;
 sigmaGrad = 0.5;
 no_bins = 8;
@@ -106,8 +106,12 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     for p = 1:M
         cornerP = centerToCorner(particles(p, 1:2), boundingBox);
         croppedImg = cropImage(image, [cornerP, boundingBox]); % Obs os�ker p� om w h eller h w.
-        colorHist = createColorHist(croppedImg);
-        liklihoodsColor(p, :) = colorHist;
+        if size(croppedImg,1) ~= 0
+            colorHist = createColorHist(croppedImg);
+            liklihoodsColor(p, :) = colorHist;
+        else
+            liklihoodsColor(p, :) = 0;
+        end
         
         %gradientOrientationHist = createGradientOrientationHist( croppedImg );
         %liklihoodsGradient(p, :) = gradientOrientationHist;
