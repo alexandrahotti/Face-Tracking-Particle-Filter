@@ -8,25 +8,26 @@ addpath('indata');
 
 %vid = VideoReader('alex_vanlig_blå.MOV');
 %vid = VideoReader('sample4.mp4');
-vid = VideoReader('occ_480.mp4');
+vid = VideoReader('jacob_red_960.mp4');
 
-updateThreshold=0.3;
+updateThreshold=0.15;
 noVideoFrams = vid.NumberOfFrames;
 timeStepSkip = 1;
+timeStepStart = 1;
 
 M = 100;
 alpha=0;
 
 sigmaY = 500/5;
-sigmaX = 700/4;
+sigmaX =600;
 
-sigmadX = 1200/6;
-sigmadY = 500/4;
+sigmadX = 1200;
+sigmadY = 500/2;
 
 
 sigmaNoise = [sigmaY sigmaX sigmadY sigmadX];
-velocityMax = [40 40/5]; % y x
-sigmaColor = 0.5;
+velocityMax = [110 40/5]; % y x
+sigmaColor = 0.4;
 sigmaGrad = 0.5;
 no_bins = 8;
 
@@ -39,28 +40,32 @@ wE = zeros(M, 1);
 wT = zeros(M, 1);
 
 
-pEStObservationVector=zeros(1, noVideoFrams);
+pEStObservationVector=zeros(timeStepStart, noVideoFrams);
 
 % create the video writer with 1 fps
-writerObj = VideoWriter('jacob_occ2.avi');
+writerObj = VideoWriter('jacob_occ_960.avi');
 writerObj.FrameRate = 30;
 open(writerObj);
 
-for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
+for t = timeStepStart : timeStepSkip : noVideoFrams %noVideoFrams
     image = read(vid, t);
     imageSize = size(image);
     
     % Vis image
 
     
-    if t ==1
+    if t ==timeStepStart
         [stateVector, boundingBox] = viola(image);
+        %stateVector = [410, 129];
+        %boundingBox = [95, 123];
         particles = initParticles([stateVector(1), stateVector(2), boundingBox], M);
         %particles = initParticlesGlobal([w h]-boundingBox/2, M);
         dBB = initDBB(cornerToCenter([stateVector(1), stateVector(2), boundingBox]),particles);
         %[boundingBox, dBB]  = initStateVector(boundingBox);
         %bb=[stateVector(1), stateVector(2)-15, boundingBox(1)-10 boundingBox(2)+15];
         % Crop the image according to the bounding box.
+        %bb=[400, 129, 95 , 123]; %t = 90;
+        %bb=[410, 129, 95 , 123]; t = 1
         cropped = cropImage(image, [stateVector(1), stateVector(2), boundingBox]);
         qC = createColorHist(cropped);
         qE = createGradientOrientationHist( cropped );
@@ -133,7 +138,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     imshow(image);
     hold on;
 
-    scatter(particles(:,1), particles(:,2),'red'); %, size, color, 'filled');
+    scatter(particles(:,1), particles(:,2),'blue'); %, size, color, 'filled');
     hold on;
     
     centeredStateVector = estimateMeanState(particles);
