@@ -10,7 +10,7 @@ addpath('indata');
 %vid = VideoReader('sample4.mp4');
 vid = VideoReader('occ_480.mp4');
 
-updateThreshold=0.3;
+updateThreshold=0.2;
 noVideoFrams = vid.NumberOfFrames;
 timeStepSkip = 1;
 
@@ -20,12 +20,12 @@ alpha=0;
 sigmaY = 500/4;
 sigmaX = 700/4;
 
-sigmadX = 1200/4;
+sigmadX = 1200/3;
 sigmadY = 500/4;
 
 
 sigmaNoise = [sigmaY sigmaX sigmadY sigmadX];
-velocityMax = [120/4 40/5]; % y x
+velocityMax = [32 40/5]; % y x
 sigmaColor = 0.5;
 sigmaGrad = 0.5;
 no_bins = 8;
@@ -42,7 +42,7 @@ wT = zeros(M, 1);
 pEStObservationVector=zeros(1, noVideoFrams);
 
 % create the video writer with 1 fps
-writerObj = VideoWriter('jacob_occ.avi');
+writerObj = VideoWriter('jacob_occ2.avi');
 writerObj.FrameRate = 30;
 open(writerObj);
 
@@ -68,7 +68,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
         
     else
         % predict
-        if real(pEStObservationVector(t-1)) > 0.3
+        if real(pEStObservationVector(t-1)) > updateThreshold
             [boundingBox, dBB] = predictBoundingBox(cornerToCenter([stateVector(1:2), boundingBox]), boundingBox, dBB, particles);
             boundInc = 0;
             a =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+boundInc]; % start end x coord of line 1
