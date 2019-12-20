@@ -5,8 +5,10 @@ close;
 addpath('indata');
 %vid = VideoReader('C:\Users\Alexa\Desktop\KTH\�rskurs_5\Applied Estimation\Project\sample4.MP4');
 %addpath('/home/jacob/Documents/EL2320/Projekt/filmer')
-vid = VideoReader('alex_vanlig_blå.MOV');
+
+%vid = VideoReader('alex_vanlig_blå.MOV');
 %vid = VideoReader('sample4.mp4');
+vid = VideoReader('occ_480.mp4');
 
 updateThreshold=0.3;
 noVideoFrams = vid.NumberOfFrames;
@@ -15,14 +17,15 @@ timeStepSkip = 1;
 M = 100;
 alpha=0;
 
+sigmaY = 500/4;
+sigmaX = 700/4;
 
-sigmaY = 700;
-sigmaX = 1500*1.1;
-sigmadX = 600;
-sigmadY = 600;
+sigmadX = 1200/4;
+sigmadY = 500/4;
 
-sigmaNoise = [sigmaY sigmaX sigmadX sigmadY];
-velocityMax = [40 40];
+
+sigmaNoise = [sigmaY sigmaX sigmadY sigmadX];
+velocityMax = [120/4 40/5]; % y x
 sigmaColor = 0.5;
 sigmaGrad = 0.5;
 no_bins = 8;
@@ -39,7 +42,7 @@ wT = zeros(M, 1);
 pEStObservationVector=zeros(1, noVideoFrams);
 
 % create the video writer with 1 fps
-writerObj = VideoWriter('jacob_sigvel600_t1.avi');
+writerObj = VideoWriter('jacob_occ.avi');
 writerObj.FrameRate = 30;
 open(writerObj);
 
@@ -56,7 +59,7 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
         %particles = initParticlesGlobal([w h]-boundingBox/2, M);
         dBB = initDBB(cornerToCenter([stateVector(1), stateVector(2), boundingBox]),particles);
         %[boundingBox, dBB]  = initStateVector(boundingBox);
-        
+        %bb=[stateVector(1), stateVector(2)-15, boundingBox(1)-10 boundingBox(2)+15];
         % Crop the image according to the bounding box.
         cropped = cropImage(image, [stateVector(1), stateVector(2), boundingBox]);
         qC = createColorHist(cropped);
@@ -65,25 +68,33 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
         
     else
         % predict
-        [boundingBox, dBB] = predictBoundingBox(cornerToCenter([stateVector(1:2), boundingBox]), boundingBox, dBB, particles);
-       
-        boundInc = 0;
-        a =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+boundInc]; % start end x coord of line 1
-        b = [stateVector(2)-boundInc stateVector(2)-boundInc]; % start end y coord of line 1
-        c = [stateVector(1)-boundInc stateVector(1)-boundInc];% start end x coord of line 2
-        d = [stateVector(2)-boundInc stateVector(2)+boundingBox(2)+boundInc];% start end y coord of line 2
-        e = [stateVector(1)+boundingBox(1)+boundInc stateVector(1)+boundingBox(1)+boundInc];% start end x coord of line 2
-        f = [stateVector(2)-boundInc stateVector(2)+boundingBox(2)+boundInc];% start end y coord of line 2
-        g =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+boundInc]; % start end x coord of line 1
-        h = [stateVector(2)+boundingBox(2)+boundInc stateVector(2)+boundingBox(2)+boundInc]; % start end y coord of line 1
-        plot(a,b,'green', c,d,'green',e,f,'green',g,h,'green');
-        hold on;
-        
-        
+        if real(pEStObservationVector(t-1)) > 0.3
+            [boundingBox, dBB] = predictBoundingBox(cornerToCenter([stateVector(1:2), boundingBox]), boundingBox, dBB, particles);
+            boundInc = 0;
+            a =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+boundInc]; % start end x coord of line 1
+            b = [stateVector(2)-boundInc stateVector(2)-boundInc]; % start end y coord of line 1
+            c = [stateVector(1)-boundInc stateVector(1)-boundInc];% start end x coord of line 2
+            d = [stateVector(2)-boundInc stateVector(2)+boundingBox(2)+boundInc];% start end y coord of line 2
+            e = [stateVector(1)+boundingBox(1)+boundInc stateVector(1)+boundingBox(1)+boundInc];% start end x coord of line 2
+            f = [stateVector(2)-boundInc stateVector(2)+boundingBox(2)+boundInc];% start end y coord of line 2
+            g =[stateVector(1)-boundInc stateVector(1)+boundingBox(1)+boundInc]; % start end x coord of line 1
+            h = [stateVector(2)+boundingBox(2)+boundInc stateVector(2)+boundingBox(2)+boundInc]; % start end y coord of line 1
+            plot(a,b,'green', c,d,'green',e,f,'green',g,h,'green');
+            hold on;
 
-        hold off
-        drawnow
-        writeVideo(writerObj, getframe(gcf));
+
+
+            hold off
+            drawnow
+            writeVideo(writerObj, getframe(gcf));
+        else
+            drawnow
+            writeVideo(writerObj, getframe(gcf));
+            
+        end
+        
+        
+     
     end
     
     
@@ -98,18 +109,18 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
         colorHist = createColorHist(croppedImg);
         liklihoodsColor(p, :) = colorHist;
         
-        gradientOrientationHist = createGradientOrientationHist( croppedImg );
-        liklihoodsGradient(p, :) = gradientOrientationHist;
+        %gradientOrientationHist = createGradientOrientationHist( croppedImg );
+        %liklihoodsGradient(p, :) = gradientOrientationHist;
         
     end
     
        
     dC = bhattacharyya(liklihoodsColor, qC);
-    dE = bhattacharyya(liklihoodsGradient, qE');
+    %dE = bhattacharyya(liklihoodsGradient, qE');
     
     wC = calculateWeights(dC, sigmaColor);
-    wE = calculateWeights(dE, sigmaGrad);
-    wTotal = wC*1 + wE*0;
+    %wE = calculateWeights(dE, sigmaGrad);
+    wTotal = wC;
     
     particles = setWeights(particles, wTotal);
     
@@ -139,15 +150,15 @@ for t = 1 : timeStepSkip : noVideoFrams %noVideoFrams
     pEStObservationVector(t)=pEStColorObservationProbability;
     
 
-    % alex
+    
     % Update target model qC if above threshold
-    if pEStColorObservationProbability > updateThreshold  
-        qC = updateTargetModel(alpha,qC,pESt);
-        qE = updateTargetModel(alpha,qE,qESt);
-    end
+%     if pEStColorObservationProbability > updateThreshold  
+%         qC = updateTargetModel(alpha,qC,pESt);
+%         qE = updateTargetModel(alpha,qE,qESt);
+%     end
 
     
     particles = systematicResample(particles);
-
+    t
 end
 close(writerObj);
