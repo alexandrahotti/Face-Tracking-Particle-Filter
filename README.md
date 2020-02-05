@@ -47,5 +47,17 @@ The matlab implementation can be found [here](https://github.com/alexandrahotti/
 <img src="https://github.com/alexandrahotti/Face-Tracking-Particle-Filter/blob/occlusion/output_videos/gifs/size-change-blue-background%20(1).gif" width = "60%"/>
 </p>
 
+## References
+Nummiaro, K., Koller-Meier, E., and Van Gool, L. An
+adaptive color-based particle filter. Image and vision
+computing, 21(1):99–110, 2003.
+
+Viola, P., Jones, M., et al. Robust real-time object detection. International journal of computer vision, 4(34-47):
+4, 2001.
+
+Wang, T., Wang, W., Liu, H., and Li, T. Research on a
+face real-time tracking algorithm based on particle filter
+multi-feature fusion. Sensors, 19(5):1245, 2019.
+
 
 
