@@ -8,14 +8,40 @@ Currently, there are two popular approaches to solving this problem. One approac
 
 In this project a particle filter based on color image features partially based on Nummiaro et al. (2003) was implemented. However, instead of including the window surrounding the face as part of the state, a self-updating tracking window was used in accordance with Wang et al. (2019).
 
+## Approach
+First, the Viola-Jones object detection framework proposed
+by Viola et al. (2001) was used to detect the initial face
+location. This position was then used as the belief of the
+particle filter at the first time step. The Viola-Jones framework detects faces using Haar Features which rely on the
+symmetry properties in human faces.
+
+The tracking was achieved using a particle filter where the
+object being tracked was believed to be at the weighted
+mean location of these particles. Observations used to update weights were based on the colors of the areas surrounding the particle, as described by Nummiaro et al. (2003).
+
+In order to transition to a new video frame, the particles
+were propagated. Weights were subsequently updated by
+measuring the similarities in color between neighborhoods
+of the propagated particles and the object being tracked.
+According to Nummiaro et al. (2003), there are numerous
+benefits of tracing objects based on their coloring. Such as
+computational efficiency and resilience against occlusion,
+scale invariance and objects changing pose relative to the
+camera, i.e. rotation.
+
+However, unlike Nummiaro et al. (2003) the window enclosing the face was not included as part of the state. Thus, instead of propagating the individual particle bounding boxes
+a self-updating tracking window as described by Wang et al.
+(2019) was implemented. At each time step, the average
+distance of all particles to the target center was computed.
+This average distance was then compared between the current and the previous time step. When the average distance
+increased the face was presumed to have moved towards the
+camera and thus the scale of the bounding box increased.
+According to Wang et al. (2019) this methodology improves
+the tracking algorithms capability of adjusting the bounding
+box when the size of the object being tracked substantially
+changes between consecutive frames.
 
 
-## Problem Statement
-The purpose of this project was to successfully implement a face tracking algorithm based on a color model. This algorithm had a self-updating tracking window as described by (Wang et al., 2019).
-
-To qualitatively assess the rigor of the tracking algorithm, it was applied to video sequences under varying image conditions. Such conditions included even and uneven lighting as well as varying background colors. 
-
-It was also qualitatively evaluated whether the tracking algorithm could withstand short term occlusion as well as a face moving at considerable speed. Lastly, an experiment was conducted to assess the self-updating tracking windows Wang et al. (2019) ability to handle scale changes.
 
 For more details see the project [report](https://github.com/alexandrahotti/Face-Tracking-Particle-Filter/blob/occlusion/Project_Report.pdf).
 
