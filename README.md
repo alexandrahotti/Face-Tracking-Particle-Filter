@@ -1,23 +1,21 @@
 # Face Tracking using a Particle Filter with color based features
-This project uses a color-based particle filter with a self-updating tracking window to trace faces in image sequences. This approach is mainly based on three previous studies.
+## Introduction
+In this project, an algorithm for tracking faces between consecutive image sequences was implemented.
 
-Firstly, to find the initial face location for the particle face tracker the Viola-Jones object detection framework proposed by Viola et al. (2001) was used. This algorithm detects faces based on symmetry properties in human faces using so-called Haar Features.
+Face tracking over video frames is used within several different computer vision applications such as video games (Tung & Matsuyama, 2008), real-time surveillance (Segen, 1996) and applications for human-computer interaction to recognize facial expressions (Black & Jepson, 1998).
 
-The face tracking is achieved by using a color-based particle filter described by Nummiaro et al. (2003). The object tracking is achieved by propagating the particles and then measuring the color similarities between the object being tracked and the color in the neighborhoods of the propagated particles. According to Nummiaro et al. (2003), the benefits of using color for tracing objects is resilience against objects disappearing from the screen, i.e. occlusion, objects changing pose relative to the camera, i.e. rotation, scale invariance when the object being tracked changes size by moving closer or further away from the camera and lastly computational efficiency.
+Currently, there are two popular approaches to solving this problem. One approach using the Mean Shift algorithm (Cheng, 1995) and another particle-based solution (Gordon et al., 1995).
 
-However, unlike Nummiaro et al. (2003) the window size
-and scale of the face being tracked is not included in the
-state, instead a self-updating tracking window as described
-by Wang et al. (2019) was implemented. This approach
-compares the average distance between particles and the
-tracked object between the current and the previous time
-step. When the average distance increases compared to the
-previous time step the window size is increased and when
-the average distance to the particle center decreases the
-window is scaled down. According to Wang et al. (2019)
-this approach improves the tracking algorithms abilities to
-adjust the face window size when the size of the object
-substantially changes throughout the video.
+In this project a particle filter based on color image features partially based on Nummiaro et al. (2003) was implemented. However, instead of including the window surrounding the face as part of the state, a self-updating tracking window was used in accordance with Wang et al. (2019).
+
+
+
+## Problem Statement
+The purpose of this project was to successfully implement a face tracking algorithm based on a color model. This algorithm had a self-updating tracking window as described by (Wang et al., 2019).
+
+To qualitatively assess the rigor of the tracking algorithm, it was applied to video sequences under varying image conditions. Such conditions included even and uneven lighting as well as varying background colors. 
+
+It was also qualitatively evaluated whether the tracking algorithm could withstand short term occlusion as well as a face moving at considerable speed. Lastly, an experiment was conducted to assess the self-updating tracking windows Wang et al. (2019) ability to handle scale changes.
 
 For more details see the project [report](https://github.com/alexandrahotti/Face-Tracking-Particle-Filter/blob/occlusion/Project_Report.pdf).
 
